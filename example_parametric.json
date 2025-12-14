@@ -1,18 +1,21 @@
 {
   "parametric_lines": {
-    "count": 15,
-    "time_factor": 0.3,
     "pattern": "connect",
+    "count": 100,
     "points": [
       {
-        "func": "circle",
-        "size": 150,
-        "angle": "n*angle_step+time"
+        "func": "sum",
+        "functions": [
+          {"func": "square", "size": 100, "angle": "n*angle_step + time"},
+          {"func": "circle", "size": 100, "angle": "n*angle_step + time"}
+        ]
       },
       {
-        "func": "circle", 
-        "size": 150,
-        "angle": "n*angle_step+time*2"
+        "func": "sum",
+        "functions": [
+          {"func": "square", "size": 100, "angle": "(n+1)*angle_step + time"},
+          {"func": "circle", "size": 100, "angle": "(n+1)*angle_step + time"}
+        ]
       }
     ]
   }

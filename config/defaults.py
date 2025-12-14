@@ -1,33 +1,33 @@
 """
-Стандартные значения - обновленные с size вместо radius
+Стандартные значения
 """
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 
 class DefaultsManager:
     """Управление стандартными значениями"""
     
-    # Глобальные стандарты
     GLOBAL_DEFAULTS = {
         "count": 36,
-        "size": 100,           # ← заменили radius на size
+        "size": 100,
         "center": [400, 300],
-        "time_factor": 0.3,
-        "angle_step": 0.1,
-        "phase_shift": 0.25,
+        "time_factor": 1.0,
         "color": [255, 255, 255],
-        "line_width": 1
     }
     
-    # Стандарты для конкретных функций
     FUNCTION_DEFAULTS = {
         "circle": {
-            "size": 100,       # ← заменили radius на size
-            "angle": "time + n"
+            "size": 100,
+            "angle": "n * angle_step"
         },
         "square": {
-            "size": 100,       # ← заменили radius на size
-            "angle": "time + 0.25 + n"
+            "size": 100,
+            "angle": "n * angle_step"
+        },
+        "ngon": {
+            "size": 100,
+            "sides": 5,
+            "angle": "n * angle_step"
         },
         "fixed": {
             "x": 0,
@@ -40,12 +40,10 @@ class DefaultsManager:
         """Применение стандартных значений"""
         result = config.copy()
         
-        # Применяем глобальные стандарты
         for key, default_value in cls.GLOBAL_DEFAULTS.items():
             if key not in result:
                 result[key] = default_value
         
-        # Для паттерна connect обрабатываем points
         if result.get('pattern') == 'connect' and 'points' in result:
             for point_config in result['points']:
                 func_name = point_config.get('func', 'circle')

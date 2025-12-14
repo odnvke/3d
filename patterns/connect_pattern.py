@@ -1,6 +1,4 @@
-"""
-Паттерн "connect" - соединение произвольных точек
-"""
+"""Паттерн "connect" - соединение произвольных точек"""
 import math
 from typing import Tuple, Dict, Any, List
 from .base_pattern import BasePattern
@@ -8,14 +6,11 @@ from math_engine.function_library import FunctionLibrary
 
 
 class ConnectPattern(BasePattern):
-    """
-    Паттерн соединения точек
-    n остаётся как есть (не умножается на angle_step)
-    """
+    """Паттерн соединения точек"""
     
     def __init__(self):
         super().__init__()
-        self.function_library = FunctionLibrary()
+        self.function_library = None  # Будет установлен позже
     
     @property
     def pattern_id(self) -> str:
@@ -36,11 +31,9 @@ class ConnectPattern(BasePattern):
         iterations = self.config.get('count', 36)
         points_count = len(points_config)
         
-        # Определяем какие точки соединяем
         segment_index = n % (points_count - 1)
         iteration = n // (points_count - 1)
         
-        # Вычисляем точки
         point1 = self._calculate_point_via_library(
             points_config[segment_index], iteration, time
         )
@@ -53,36 +46,26 @@ class ConnectPattern(BasePattern):
     def _calculate_point_via_library(self, point_config: Dict[str, Any], 
                                     n: int, time: float) -> Tuple[float, float]:
         """Вычисление точки через FunctionLibrary"""
+        # Инициализируем function_library если еще не инициализирован
+        if self.function_library is None:
+            self.function_library = FunctionLibrary(self.expression_parser)
+        
         func_name = point_config.get('func', 'circle')
         
         try:
             params = point_config.copy()
             total_count = self.config.get('count', 36)
             
-            # Контекст для парсера
             context = {
                 'n': n,
                 'time': time,
                 'count': total_count,
-                'angle_step': 2 * math.pi / total_count,
+                'angle_step': 2 * math.pi / total_count if total_count > 0 else 0,
             }
             
-            # Если есть angle - парсим только если это строка
-            if 'angle' in params:
-                angle_value = params['angle']
-                
-                if isinstance(angle_value, str):
-                    # Это выражение - парсим
-                    parsed_angle = self.expression_parser.parse(angle_value, context)
-                    params['angle'] = parsed_angle
-                else:
-                    # Уже число - оставляем как есть
-                    params['angle'] = float(angle_value)
+            # Вычисляем через библиотеку функций с контекстом
+            coords = self.function_library.evaluate(func_name, params, context)
             
-            # Вычисляем координаты
-            coords = self.function_library.evaluate(func_name, params)
-            
-            # Применяем смещение центра
             center_x = self.config.get('center_x', 400)
             center_y = self.config.get('center_y', 300)
             
@@ -98,6 +81,4 @@ class ConnectPattern(BasePattern):
                 
         except Exception as e:
             print(f"Error calculating point: {e}")
-            import traceback
-            traceback.print_exc()
             return (400, 300)

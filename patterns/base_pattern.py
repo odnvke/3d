@@ -2,7 +2,7 @@
 Базовый класс для всех паттернов
 """
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict, Any
+from typing import Tuple, Dict, Any
 import math
 
 
@@ -29,13 +29,6 @@ class BasePattern(ABC):
     def calculate_line(self, n: int, time: float) -> Tuple[Tuple[float, float], Tuple[float, float]]:
         """
         Вычисление координат для линии n
-        
-        Args:
-            n: Номер линии (0..get_line_count()-1)
-            time: Текущее время
-            
-        Returns:
-            ((start_x, start_y), (end_x, end_y))
         """
         pass
     
@@ -54,21 +47,12 @@ class BasePattern(ABC):
     def get_line_color(self, n: int, time: float) -> Tuple[int, int, int]:
         """
         Получение цвета для линии n
-        
-        Args:
-            n: Номер линии
-            time: Текущее время
-            
-        Returns:
-            Цвет (R, G, B)
         """
-        # Базовая реализация - цвет из конфигурации или радуга
         if 'color' in self.config:
             color = self.config['color']
             if len(color) >= 3:
                 return tuple(color[:3])
         
-        # Градиент радуги по умолчанию
         hue = (n / max(1, self.get_line_count())) * 360
         return self._hsv_to_rgb(hue, 100, 100)
     
