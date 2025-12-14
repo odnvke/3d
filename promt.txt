@@ -10,14 +10,14 @@ line_drawer/
 ├── config_loader.py     # Загрузчик JSON файлов
 ├── example.json         # Пример конфигурации для тестов
 
-🧩 Аддоны (добавляются по мере необходимости):
-text
-
+🧩 Аддоны:
 line_drawer/
-├── addon_lines.py       # Аддон рисования линий
-├── addon_shapes.py      # Аддон рисования фигур (круги, прямоугольники)
-├── addon_effects.py     # Аддон эффектов (анимация, тени)
-├── addon_custom.py      # Ваш собственный аддон
+├── addon_lines.py
+├── addon_shapes.py
+├── addon_parametric.py     # ЕДИНСТВЕННЫЙ аддон для параметрических линий
+└── addon_custom.py
+
+🎯 Поддерживается ТОЛЬКО паттерн "connect"
 
 🔄 Поток данных:
 text

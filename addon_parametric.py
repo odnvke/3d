@@ -1,35 +1,30 @@
 """
-Аддон параметрических линий - основной аддон для работы с паттернами
+Аддон параметрических линий
 """
 import pyglet
 import time as time_module
 from typing import Dict, Any, Optional, List
 from addon_base import BaseAddon
 from math_engine.expression_parser import ExpressionParser
-from patterns.circle_pattern import CirclePattern
-from patterns.spiral_pattern import SpiralPattern
-from patterns.cube_pattern import CubePattern
+from patterns.connect_pattern import ConnectPattern
 
 
 class ParametricLinesAddon(BaseAddon):
-    """Аддон для рисования параметрических линий по паттернам"""
+    """Аддон для рисования параметрических линий"""
     
     def __init__(self):
-        self.patterns = {}
         self.lines = []
         self.batch = None
         self.expression_parser = ExpressionParser()
         self.start_time = time_module.time()
         
-        # Регистрация доступных паттернов
+        # Регистрация паттернов
         self._register_patterns()
     
     def _register_patterns(self):
-        """Регистрация всех доступных паттернов"""
+        """Регистрация паттернов"""
         self.pattern_classes = {
-            'circle': CirclePattern,
-            'spiral': SpiralPattern,
-            'cube': CubePattern,
+            'connect': ConnectPattern,
         }
     
     @property
@@ -41,7 +36,7 @@ class ParametricLinesAddon(BaseAddon):
         return ["parametric_lines"]
     
     def validate(self, data: Any) -> bool:
-        """Валидация данных параметрических линий"""
+        """Валидация данных"""
         return isinstance(data, dict)
     
     def create_batch(self, data: Dict[str, Any], batch: Optional[pyglet.graphics.Batch] = None) -> pyglet.graphics.Batch:
@@ -53,12 +48,10 @@ class ParametricLinesAddon(BaseAddon):
         self.lines = []
         self.start_time = time_module.time()
         
-        print(f"ParametricLinesAddon: Creating pattern '{data.get('pattern', 'unknown')}'")
+        pattern_name = data.get('pattern', 'connect')
         
         # Создаем паттерн
-        pattern_name = data.get('pattern', 'circle')
-        pattern_class = self.pattern_classes.get(pattern_name, CirclePattern)
-        pattern = pattern_class()
+        pattern = ConnectPattern()
         
         # Настраиваем паттерн
         pattern.set_config(data)
@@ -72,7 +65,9 @@ class ParametricLinesAddon(BaseAddon):
     def _create_pattern_lines(self, pattern, config: Dict[str, Any]):
         """Создание графических линий для паттерна"""
         line_count = pattern.get_line_count()
-        print(f"  Creating {line_count} lines for pattern '{pattern.pattern_id}'")
+        
+        if line_count == 0:
+            return
         
         current_time = time_module.time() - self.start_time
         
@@ -81,18 +76,10 @@ class ParametricLinesAddon(BaseAddon):
                 # Получаем координаты линии
                 (start_x, start_y), (end_x, end_y) = pattern.calculate_line(n, current_time)
                 
-                # СДВИГАЕМ В ЦЕНТР ЭКРАНА!
-                # Если center не указан, используем центр экрана
-                if 'center' not in config:
-                    start_x += 512  # половина ширины 1024
-                    start_y += 384  # половина высоты 768
-                    end_x += 512
-                    end_y += 384
+                # Белый цвет
+                color = (255, 255, 255)
                 
-                # Получаем цвет
-                color = pattern.get_line_color(n, current_time)
-                
-                # Создаем линию Pyglet
+                # Создаем линию
                 line = pyglet.shapes.Line(
                     start_x, start_y,
                     end_x, end_y,
@@ -100,22 +87,19 @@ class ParametricLinesAddon(BaseAddon):
                     batch=self.batch
                 )
                 
-                # Устанавливаем толщину
-                line.width = config.get('line_width', 2)
-                
                 self.lines.append({
                     'shape': line,
                     'pattern': pattern,
                     'index': n,
-                    'config': config
+                    'config': config.copy()
                 })
                 
-            except Exception as e:
-                print(f"  Error creating line {n}: {e}")
+            except Exception:
+                pass
     
     def update_lines(self):
         """Обновление линий на основе текущего времени"""
-        if not self.batch:
+        if not self.batch or not self.lines:
             return
         
         current_time = time_module.time() - self.start_time
@@ -125,17 +109,9 @@ class ParametricLinesAddon(BaseAddon):
                 pattern = line_info['pattern']
                 n = line_info['index']
                 line = line_info['shape']
-                config = line_info['config']
                 
                 # Вычисляем новые координаты
                 (start_x, start_y), (end_x, end_y) = pattern.calculate_line(n, current_time)
-                
-                # СДВИГАЕМ В ЦЕНТР ЭКРАНА!
-                if 'center' not in config:
-                    start_x += 512
-                    start_y += 384
-                    end_x += 512
-                    end_y += 384
                 
                 # Обновляем линию
                 line.x = start_x
@@ -143,17 +119,10 @@ class ParametricLinesAddon(BaseAddon):
                 line.x2 = end_x
                 line.y2 = end_y
                 
-                # Обновляем цвет
-                color = pattern.get_line_color(n, current_time)
-                line.color = color
-                
-            except Exception as e:
-                print(f"Error updating line: {e}")
+            except Exception:
+                pass
     
     def draw(self, batch: pyglet.graphics.Batch):
         """Отрисовка с обновлением анимации"""
-        # Обновляем линии
         self.update_lines()
-        
-        # Рисуем
         batch.draw()

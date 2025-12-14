@@ -1,9 +1,19 @@
 {
   "parametric_lines": {
-    "pattern": "circle",
-    "count": 360,
-    "radius": 150,
-    "time_factor": 0.5,
-    "line_width": 10
+    "count": 15,
+    "time_factor": 0.3,
+    "pattern": "connect",
+    "points": [
+      {
+        "func": "circle",
+        "size": 150,
+        "angle": "n*angle_step+time"
+      },
+      {
+        "func": "circle", 
+        "size": 150,
+        "angle": "n*angle_step+time*2"
+      }
+    ]
   }
 }

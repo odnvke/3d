@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Any
 
+
 class ConfigLoader:
     """Загрузка и парсинг JSON конфигурации"""
     
@@ -9,7 +10,9 @@ class ConfigLoader:
         """Загрузка JSON из файла"""
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                print(f"ConfigLoader: Successfully loaded {filepath}")
+                return data
         except Exception as e:
             print(f"Error loading JSON: {e}")
             return {}
@@ -19,5 +22,4 @@ class ConfigLoader:
         """Базовая валидация структуры"""
         if not isinstance(data, dict):
             return False
-        # Можно добавить JSON Schema валидацию
         return True
