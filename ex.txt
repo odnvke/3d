@@ -1,0 +1,33 @@
+{
+  "parametric_lines": {
+    "pattern": "connect",
+    "count": 12,
+    "center": [400, 300],
+    "points": [
+      {"func": "fixed", "x": "400", "y": "300"},
+      {"func": "circle", "size": "100", "angle": "time"},
+      {"func": "square", "size": "80", "angle": "time * 2"},
+      {"func": "ngon", "size": "60", "sides": "5", "angle": "time"},
+      {
+        "func": "sum",
+        "functions": [
+          {"func": "circle", "size": "40", "angle": "time"},
+          {"func": "circle", "size": "20", "angle": "time + pi"}
+        ]
+      },
+      {
+        "func": "multiply",
+        "operation": "elementwise", // "elementwise", "scalar_x", "scalar_y"
+        "functions": []
+      },
+      {
+        "func": "morph",
+        "t": "(sin(time) + 1) / 2",
+        "functions": []
+      }
+    ]
+  },
+  "lines": [
+    {"start": ["50", "50"], "end": ["750", "550"], "color": ["255", "0", "0"]}
+  ]
+}

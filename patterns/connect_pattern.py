@@ -50,9 +50,11 @@ class ConnectPattern(BasePattern):
         if self.function_library is None:
             self.function_library = FunctionLibrary(self.expression_parser)
         
+        # Получаем имя функции ДО try блока
         func_name = point_config.get('func', 'circle')
         
         try:
+            # Копируем конфиг
             params = point_config.copy()
             total_count = self.config.get('count', 36)
             
@@ -63,7 +65,26 @@ class ConnectPattern(BasePattern):
                 'angle_step': 2 * math.pi / total_count if total_count > 0 else 0,
             }
             
-            # Вычисляем через библиотеку функций с контекстом
+            # Парсим все строковые параметры перед передачей в функцию
+            if self.expression_parser:
+                parsed_params = {}
+                for key, value in params.items():
+                    if key == 'func':
+                        continue
+                    elif isinstance(value, str):
+                        # Парсим выражение с контекстом
+                        parsed_params[key] = self.expression_parser.parse(value, context)
+                    else:
+                        parsed_params[key] = value
+                params = parsed_params
+            
+            # Добавляем angle в params если его нет
+            if 'angle' not in params:
+                # По умолчанию используем n * angle_step
+                angle_step = 2 * math.pi / total_count if total_count > 0 else 0
+                params['angle'] = n * angle_step
+            
+            # Вычисляем через библиотеку функций
             coords = self.function_library.evaluate(func_name, params, context)
             
             center_x = self.config.get('center_x', 400)
@@ -78,7 +99,7 @@ class ConnectPattern(BasePattern):
             final_y = center_y + coords[1] if len(coords) > 1 else center_y
             
             return (final_x, final_y)
-                
+                    
         except Exception as e:
-            print(f"Error calculating point: {e}")
+            print(f"Error calculating point (func={func_name}): {e}")
             return (400, 300)
