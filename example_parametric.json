@@ -1,0 +1,9 @@
+{
+  "parametric_lines": {
+    "pattern": "circle",
+    "count": 360,
+    "radius": 150,
+    "time_factor": 0.5,
+    "line_width": 10
+  }
+}
