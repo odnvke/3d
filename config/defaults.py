@@ -11,7 +11,7 @@ class DefaultsManager:
         "count": 36,
         "size": 100,
         "center": [400, 300],
-        "time_factor": 1.0,
+        "time_factor": 0.25,
         "color": [255, 255, 255],
     }
     

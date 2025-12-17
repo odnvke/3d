@@ -6,17 +6,22 @@
 from core import LineDrawerApp
 from addon_lines import LinesAddon
 from addon_parametric import ParametricLinesAddon
-# from addon_shapes import ShapesAddon
 
 
 def main():
     # Создаем приложение
     app = LineDrawerApp("example_parametric.json", width=1024, height=768)
     
+    # Создаем коллбэк для получения центра окна
+    def get_window_center():
+        return app.window_center
+    
     # Регистрируем аддоны
     app.register_addon(LinesAddon())
-    app.register_addon(ParametricLinesAddon())  # Параметрические линии
-    #app.register_addon(ShapesAddon())
+    
+    # Передаем коллбэк в параметрический аддон
+    parametric_addon = ParametricLinesAddon(window_center_callback=get_window_center)
+    app.register_addon(parametric_addon)
     
     # Запускаем
     app.run()

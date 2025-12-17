@@ -3,7 +3,7 @@
 """
 import pyglet
 import time as time_module
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Callable
 from addon_base import BaseAddon
 from math_engine.expression_parser import ExpressionParser
 from patterns.connect_pattern import ConnectPattern
@@ -12,11 +12,12 @@ from patterns.connect_pattern import ConnectPattern
 class ParametricLinesAddon(BaseAddon):
     """Аддон для рисования параметрических линий"""
     
-    def __init__(self):
+    def __init__(self, window_center_callback: Callable[[], List[int]] = None):
         self.lines = []
         self.batch = None
         self.expression_parser = ExpressionParser()
         self.start_time = time_module.time()
+        self.window_center_callback = window_center_callback  # Коллбэк для получения центра
         
         # Регистрация паттернов
         self._register_patterns()
@@ -47,6 +48,13 @@ class ParametricLinesAddon(BaseAddon):
         self.batch = batch
         self.lines = []
         self.start_time = time_module.time()
+        
+        # Автоматически получаем центр окна, если не задан явно
+        if 'center' not in data and self.window_center_callback:
+            center = self.window_center_callback()
+            if center:
+                data['center'] = center
+                print(f"ParametricLines: Using window center {center}")
         
         pattern_name = data.get('pattern', 'connect')
         
@@ -94,7 +102,8 @@ class ParametricLinesAddon(BaseAddon):
                     'config': config.copy()
                 })
                 
-            except Exception:
+            except Exception as e:
+                print(f"Error creating line {n}: {e}")
                 pass
     
     def update_lines(self):
@@ -119,7 +128,8 @@ class ParametricLinesAddon(BaseAddon):
                 line.x2 = end_x
                 line.y2 = end_y
                 
-            except Exception:
+            except Exception as e:
+                print(f"Error updating line: {e}")
                 pass
     
     def draw(self, batch: pyglet.graphics.Batch):

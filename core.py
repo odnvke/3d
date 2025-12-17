@@ -1,5 +1,6 @@
 import pyglet
 from typing import Dict, Any
+from pyglet.math import Mat4
 from addon_manager import AddonManager
 from config_loader import ConfigLoader
 
@@ -15,12 +16,19 @@ class LineDrawerApp:
         self.batches = {}
         self.update_interval = 1/60  # 60 FPS
         
-        # Создаем окно
+        # Центр окна (будет обновляться)
+        self.window_center = [width // 2, height // 2]
+        
+        config = pyglet.gl.Config(sample_buffers=1, samples=8)  # 4x MSAA
         self.window = pyglet.window.Window(
             width, height, 
             "Parametric Line Drawer", 
-            resizable=True
+            resizable=True,
+            config=config
         )
+        
+        # Устанавливаем начальную проекцию
+        self.window.projection = Mat4.orthogonal_projection(0, width, 0, height, -1, 1)
         
         # Настраиваем события
         self.setup_events()
@@ -54,6 +62,23 @@ class LineDrawerApp:
         @self.window.event
         def on_mouse_press(x, y, button, modifiers):
             print(f"Mouse click at ({x:.0f}, {y:.0f})")
+        
+        @self.window.event
+        def on_resize(width, height):
+            """Обработчик изменения размера окна"""
+            self.width = width
+            self.height = height
+            self.window_center = [width // 2, height // 2]
+            print(f"Window resized to {width}x{height}, center: {self.window_center}")
+            
+            # Устанавливаем viewport
+            pyglet.gl.glViewport(0, 0, width, height)
+            
+            # Обновляем проекцию для нового размера окна
+            self.window.projection = Mat4.orthogonal_projection(0, width, 0, height, -1, 1)
+            
+            # Перезагружаем конфигурацию с новым центром
+            self.load_config()
     
     def register_addon(self, addon):
         """Регистрация аддона"""
@@ -74,7 +99,8 @@ class LineDrawerApp:
     
     def update(self, dt):
         """Обновление состояния для анимации"""
-        pass  # Анимация обновляется в аддонах
+        # Анимация обновляется в аддонах, но можно добавить здесь логику
+        pass
     
     def draw(self):
         """Отрисовка всех элементов"""
